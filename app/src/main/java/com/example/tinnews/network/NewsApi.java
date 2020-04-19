@@ -12,6 +12,6 @@ public interface NewsApi {
     Call<NewsResponse> getTopHeadlines(@Query("country") String country);
 
     @GET("everything")
-    Call<NewsResponse> getEverything(@Query("q") String query);
+    Call<NewsResponse> getEverything(@Query("q") String query, int i);
 
 }
