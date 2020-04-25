@@ -26,6 +26,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    viewBinding {
+        enabled = true
+    }
+
 }
 
 dependencies {
@@ -50,4 +54,7 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.2.4'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
+    implementation 'com.mindorks:placeholderview:0.7.1'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
 }
