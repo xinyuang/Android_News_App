@@ -6,17 +6,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Toast;
 
 import com.example.tinnews.R;
 import com.example.tinnews.databinding.FragmentSearchBinding;
+import com.example.tinnews.model.Article;
 import com.example.tinnews.repository.NewsRepository;
 import com.example.tinnews.repository.NewsViewModelFactory;
+
+import static android.widget.Toast.LENGTH_SHORT;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -24,6 +29,7 @@ import com.example.tinnews.repository.NewsViewModelFactory;
 public class SearchFragment extends Fragment {
     private SearchViewModel viewModel;
     private FragmentSearchBinding binding;
+
     public SearchFragment() {
         // Required empty public constructor
     }
@@ -41,7 +47,36 @@ public class SearchFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-         
+
+        SearchNewsAdapter newsAdapter = new SearchNewsAdapter();
+        newsAdapter.setLikeListener(new SearchNewsAdapter.LikeListener() {
+            @Override
+            public void onLike(Article article) {
+                                viewModel.setFavoriteArticleInput(article);
+                            }
+
+                    @Override
+            public void onClick(Article article) {
+                                // TODO
+                                    }
+        });
+
+
+        
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+
+            @Override
+            public int getSpanSize(int position) {
+                return position == 0 ? 2 : 1;
+            }
+        });
+
+
+        binding.recyclerView.setLayoutManager(gridLayoutManager);
+        binding.recyclerView.setAdapter(newsAdapter);
+
+
         binding.searchView.setOnEditorActionListener(
                         (v, actionId, event) -> {
                                 String searchText = binding.searchView.getText().toString();
@@ -59,13 +94,27 @@ public class SearchFragment extends Fragment {
                 .get(SearchViewModel.class);
 //        viewModel.setSearchInput("Covid-19");
         viewModel
-                .searchNews()
-                .observe(
-                        getViewLifecycleOwner(),
-                        newsResponse -> {
-                            if (newsResponse != null) {
-                                Log.d("SearchFragment", newsResponse.toString());
-                            }
+            .searchNews()
+            .observe(
+                    getViewLifecycleOwner(),
+                    newsResponse -> {
+                        if (newsResponse != null) {
+                            Log.d("SearchFragment", newsResponse.toString());
+                            newsAdapter.setArticles(newsResponse.articles);
+                        }
+                    });
+        viewModel
+            .onFavorite()
+            .observe(
+                    getViewLifecycleOwner(),
+                    isSuccess -> {
+                            if (isSuccess) {
+                                    Toast.makeText(requireActivity(), "Success", LENGTH_SHORT).show();
+                                    newsAdapter.notifyDataSetChanged();
+                                } else {
+                                    Toast.makeText(requireActivity(), "You might have liked before", LENGTH_SHORT).show();
+                                }
                         });
+        
     }
 }

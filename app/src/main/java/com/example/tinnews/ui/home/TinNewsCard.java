@@ -27,13 +27,23 @@ public class TinNewsCard {
     private TextView newsDescription;
 
     private final Article article;
+//    private final OnSwipeListener onSwipeListener;
+    private final OnSwipeListener onSwipeListener;
 
-    public TinNewsCard(Article news) {
+    public TinNewsCard(Article news, OnSwipeListener onSwipeListener) {
         this.article = news;
+        this.onSwipeListener = onSwipeListener;
+
     }
 
     @Resolve
     private void onResolved() {
+        if (article.urlToImage == null || article.urlToImage.isEmpty()) {
+            Log.d("EVENT", "！！！empty");
+            image.setImageResource(R.drawable.ic_empty_image);
+        } else {
+            Picasso.get().load(article.urlToImage).into(image);
+        }
         newsTitle.setText(article.title);
         newsDescription.setText(article.description);
     }
@@ -41,11 +51,7 @@ public class TinNewsCard {
     @SwipeOut
     private void onSwipedOut() {
         Log.d("EVENT", "onSwipedOut");
-        if (article.urlToImage == null || article.urlToImage.isEmpty()) {
-               image.setImageResource(R.drawable.ic_empty_image);
-             } else {
-               Picasso.get().load(article.urlToImage).into(image);
-             }
+        onSwipeListener.onDisLike(article);
     }
 
     @SwipeCancelState
@@ -56,5 +62,11 @@ public class TinNewsCard {
     @SwipeIn
     private void onSwipeIn() {
         Log.d("EVENT", "onSwipedIn");
+        onSwipeListener.onLike(article);
+    }
+
+    interface OnSwipeListener {
+        void onLike(Article news);
+        void onDisLike(Article news);
     }
 }
